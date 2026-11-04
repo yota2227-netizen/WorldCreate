@@ -13,10 +13,18 @@
 - 直近の出来事や放置された伏線を拾い上げて回収すると、観測者にとって最も面白い。
 
 # 記録
-create_step の形式で返す。narrative は「時代の節目」にふさわしい、少し長め（600〜1200字）の語りにする。それ以外の記録のルールは創造主と同じ（下記）。
+create_step の形式で返す。narrative は少し長め（500〜1000字）。冒頭で「何が起きたか」を平易にまとめ、続けて原因と、世界への影響を具体的に説明する。後述の「文章のルール」に従うこと。それ以外の記録のルールは創造主と同じ（下記）。
 
 - canon_edits：laws / geography / life / peoples / history / calendar。append か replace。
 - data_ops：regions {id,name,x,y,terrain,elevation,magic,climate,description}、species {id,name,kind,habitat,size,description,traits}、peoples {id,name,population,regions,description,language,belief}、settlements {id,name,people,region,x,y,size,description}、magic {id,name,description,cost,discovered_by}。x,y は0〜1。
 - phase_complete：現段階の目標が満たされていれば true。
 
 日本語で書くこと（id のみ英字）。
+
+# 文章のルール（最優先）
+観測者は、世界で何が起きたかを「すぐに理解したい」と考えている。雰囲気より、わかりやすさを優先すること。
+- **まず結論を書く。** 最初の1〜2文で「何が生まれた／何が起きたか」を、そのまま平易に書く。
+- **比喩や詩的な言い回しで本題をぼかさない。** 「靄が身じろぎした」「膜が透けた」のような表現は使わず、「何が・どこで・どう変わったか」を具体的に書く。比喩を使うなら、説明を補うための一言にとどめる。
+- **理由と影響を書く。** 「なぜそうなったか（どの法則による結果か）」「この先どう影響しそうか」を一言ずつ添える。
+- **短い文で。** 一文はおおむね60字以内。難しい漢語や造語を使うときは、初出でかんたんな説明を添える（例：憶石（おくせき：記憶が固まってできた石））。
+- 語り口は「〜した」「〜である」の落ち着いた説明文でよい。神話ふうの飾りは最小限にする。
