@@ -1,0 +1,58 @@
+{
+  "updated_at": "2026-11-04T09:03:35.231611+00:00",
+  "world_name": "レスモネ",
+  "date": "創世暦1年 1月 2日",
+  "tick": 1,
+  "phase": 1,
+  "phase_name": "法則の創造",
+  "creation_count": 1,
+  "reports": [],
+  "logs": [
+    "Y0001-M01"
+  ],
+  "creations": [
+    "Y0001"
+  ],
+  "canon": [
+    [
+      "laws",
+      "法則と魔法"
+    ],
+    [
+      "geography",
+      "大地と気候"
+    ],
+    [
+      "life",
+      "生命"
+    ],
+    [
+      "peoples",
+      "種族と文明"
+    ],
+    [
+      "history",
+      "歴史の要約"
+    ],
+    [
+      "calendar",
+      "暦と天体"
+    ]
+  ],
+  "usage": {
+    "month": "2026-11",
+    "cost_usd": 0.060934,
+    "calls": 3,
+    "by_model": {
+      "claude-sonnet-5-5": {
+        "calls": 1,
+        "cost_usd": 0.059775
+      },
+      "claude-haiku-5-5": {
+        "calls": 2,
+        "cost_usd": 0.001159
+      }
+    },
+    "history": []
+  }
+}
