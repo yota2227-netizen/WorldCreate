@@ -315,19 +315,30 @@ def call_tool(model, system_role, context, tool, max_tokens):
         {"type": "text", "text": "# 世界の聖典（これまでに定められた設定）\n\n" + canon_text(),
          "cache_control": {"type": "ephemeral"}},
     ]
+    instruction = (f"\n\n【回答方法】考えがまとまったら、必ず {tool['name']} ツールを1回だけ呼び出して回答すること。"
+                   "ツールを使わずに文章だけで答えてはいけない。")
     kwargs = dict(model=model, max_tokens=max_tokens, system=system,
-                  messages=[{"role": "user", "content": context}], tools=[tool])
-    try:
-        resp = client.messages.create(tool_choice={"type": "tool", "name": tool["name"]}, **kwargs)
-    except anthropic.BadRequestError as e:
-        if "tool_choice" not in str(e):
-            raise
-        kwargs["messages"][0]["content"] += f"\n\n必ず {tool['name']} ツールを1回呼び出して回答すること。"
-        resp = client.messages.create(tool_choice={"type": "any"}, **kwargs)
+                  messages=[{"role": "user", "content": context + instruction}], tools=[tool])
 
-    cost = record_usage(model, resp.usage.model_dump())
-    print(f"  [{model}] in={resp.usage.input_tokens} out={resp.usage.output_tokens} ${cost:.4f}")
-    for block in resp.content:
-        if block.type == "tool_use":
-            return block.input
+    for attempt in range(3):
+        forced = model not in _NO_FORCED_TOOL
+        try:
+            choice = {"type": "tool", "name": tool["name"]} if forced else {"type": "auto"}
+            resp = client.messages.create(tool_choice=choice, **kwargs)
+        except anthropic.BadRequestError as e:
+            # 一部のモデルは「ツールの強制」に非対応。その場合は自由回答＋指示で頼む
+            if forced and "tool_choice" in str(e):
+                _NO_FORCED_TOOL.add(model)
+                continue
+            raise
+        cost = record_usage(model, resp.usage.model_dump())
+        print(f"  [{model}] in={resp.usage.input_tokens} out={resp.usage.output_tokens} "
+              f"${cost:.4f} stop={resp.stop_reason}")
+        for block in resp.content:
+            if block.type == "tool_use" and block.name == tool["name"] and isinstance(block.input, dict):
+                return block.input
+        print("  ツール形式の回答が得られなかったため再依頼します")
     raise RuntimeError("AIがツール形式で回答しませんでした")
+
+
+_NO_FORCED_TOOL = set()

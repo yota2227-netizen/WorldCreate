@@ -82,7 +82,7 @@ def run_create(st, oracle_text=None):
     ctx += "\n\n上の状況を踏まえ、創造を一歩だけ進めてください。"
 
     role = C.prompt("creator")
-    res = C.call_tool(S.MODEL_CREATOR, role, ctx, T.CREATE, 8000)
+    res = C.call_tool(S.MODEL_CREATOR, role, ctx, T.CREATE, 16000)
 
     # 検証係による矛盾チェック（1回だけ差し戻し可）
     check_ctx = (
@@ -90,12 +90,12 @@ def run_create(st, oracle_text=None):
         + "\n# 今回提案された創造\n" + json.dumps(res, ensure_ascii=False)
         + "\n\n# 現在の数値データ\n" + C.data_summary(detail=False)
     )
-    chk = C.call_tool(S.MODEL_SMALL, C.prompt("checker"), check_ctx, T.CHECK, 1500)
+    chk = C.call_tool(S.MODEL_SMALL, C.prompt("checker"), check_ctx, T.CHECK, 3000)
     if not chk.get("ok") and chk.get("problems"):
         print("  検証係が差し戻し:", chk["problems"])
         retry_ctx = ctx + "\n\n# 検証係からの指摘（前回の案はこの理由で差し戻された）\n" + \
             "\n".join(f"- {p}" for p in chk["problems"]) + "\n指摘を解消した案を出し直してください。"
-        res = C.call_tool(S.MODEL_CREATOR, role, retry_ctx, T.CREATE, 8000)
+        res = C.call_tool(S.MODEL_CREATOR, role, retry_ctx, T.CREATE, 16000)
 
     apply_creation(st, res, kind)
     st["creation_count"] += 1
@@ -113,7 +113,7 @@ def run_day(st):
         + "\n\n# 現在の数値データ（概要）\n" + C.data_summary(detail=False, limit=40)
         + "\n\nこの日に起きた小さな出来事を記録してください。"
     )
-    res = C.call_tool(S.MODEL_SMALL, C.prompt("daily"), ctx, T.EVENTS, 2000)
+    res = C.call_tool(S.MODEL_SMALL, C.prompt("daily"), ctx, T.EVENTS, 4000)
     C.add_events(st, res.get("events"))
     C.apply_data_ops(res.get("data_ops"))
 
@@ -136,7 +136,7 @@ def run_report(st, month_tick):
         + "\n\n# この月の創造の記録\n" + creations_context(4)
         + "\n\nこの1か月をまとめた月報を書いてください。"
     )
-    res = C.call_tool(S.MODEL_SMALL, C.prompt("reporter"), ctx, T.REPORT, 4000)
+    res = C.call_tool(S.MODEL_SMALL, C.prompt("reporter"), ctx, T.REPORT, 6000)
     path = C.WORLD / "chronicle" / f"{key}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(f"# {res.get('headline', '')}\n\n*創世暦{y}年 {mname}*\n\n{res.get('article', '')}\n", encoding="utf-8")
@@ -155,7 +155,7 @@ def run_epoch(st):
         + "\n\n# 現在の数値データ\n" + C.data_summary()
         + "\n\n世界全体を点検し、時代の節目となる創造を行ってください。"
     )
-    res = C.call_tool(S.MODEL_EPOCH, C.prompt("epoch"), ctx, T.CREATE, 16000)
+    res = C.call_tool(S.MODEL_EPOCH, C.prompt("epoch"), ctx, T.CREATE, 20000)
     apply_creation(st, res, "epoch")
     st["creation_count"] += 1
     advance_phase(st, bool(res.get("phase_complete")))
