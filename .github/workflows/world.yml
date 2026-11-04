@@ -26,9 +26,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -43,17 +43,21 @@ jobs:
           else echo "mode=auto" >> "$GITHUB_OUTPUT"; fi
 
       - name: 世界を動かす
+        id: run
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           WORLD_MONTHLY_BUDGET: ${{ vars.WORLD_MONTHLY_BUDGET || '90' }}
         run: |
           if [ -z "$ANTHROPIC_API_KEY" ]; then
             echo "::warning::ANTHROPIC_API_KEY が未登録のため、世界はまだ眠っています"
+            echo "ran=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+          echo "ran=true" >> "$GITHUB_OUTPUT"
           python engine/tick.py "${{ steps.mode.outputs.mode }}"
 
       - name: 世界の変化を記録する
+        if: steps.run.outputs.ran == 'true'
         run: |
           git config user.name "world-clock"
           git config user.email "world-clock@users.noreply.github.com"
