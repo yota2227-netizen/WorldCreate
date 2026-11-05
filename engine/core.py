@@ -218,6 +218,29 @@ def recent_creations(n=3):
     return out[-n:]
 
 
+def relabel_dates(st):
+    """月名などが変わったとき、過去の記録の日付表記を現在の暦にそろえる。"""
+    def fix(path):
+        p = WORLD / path
+        if not p.exists():
+            return
+        rows = json.loads(p.read_text(encoding="utf-8"))
+        changed = False
+        for r in rows:
+            if isinstance(r, dict) and "tick" in r:
+                lbl = date_label(st, r["tick"])
+                if r.get("date") != lbl:
+                    r["date"] = lbl
+                    changed = True
+        if changed:
+            write_json(path, rows)
+    for sub in ("log", "creations"):
+        for f in (WORLD / sub).glob("*.json"):
+            fix(f"{sub}/{f.name}")
+    fix("timeline.json")
+    fix("oracles.json")
+
+
 def build_index(st):
     """ビューアが読む目次ファイルを作る。"""
     idx = {
@@ -228,6 +251,8 @@ def build_index(st):
         "phase": st["phase"],
         "phase_name": phase_info(st)["name"],
         "creation_count": st["creation_count"],
+        "next_creation_in": S.CREATION_EVERY_TICKS - (st["tick"] % S.CREATION_EVERY_TICKS),
+        "creation_every": S.CREATION_EVERY_TICKS,
         "reports": sorted(p.stem for p in (WORLD / "chronicle").glob("*.md")),
         "logs": sorted(p.stem for p in (WORLD / "log").glob("*.json")),
         "creations": sorted(p.stem for p in (WORLD / "creations").glob("*.json")),

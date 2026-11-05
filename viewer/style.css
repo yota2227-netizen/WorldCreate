@@ -84,6 +84,7 @@ main { max-width: 1080px; margin: 0 auto; padding: 8px 16px 40px; }
 }
 .scroll h2 { color: #7a5a22; }
 .scroll .narrative { font-family: var(--serif); font-size: 17px; line-height: 2; white-space: pre-wrap; }
+.scroll .next-note { margin: 14px 0 0; padding-top: 10px; border-top: 1px dashed #b89c66; font-size: 13px; color: #6b5a3a; }
 .scroll .stamp { font-size: 12px; color: #7a6a4d; letter-spacing: .1em; }
 .paper { background: var(--paper); color: var(--paper-ink); border: none; }
 .paper h1, .paper h2 { color: var(--paper-ink); }

@@ -1,7 +1,7 @@
 [
   {
     "tick": 0,
-    "date": "創世暦1年 1月 1日",
+    "date": "創世暦1年 初打 1日",
     "kind": "creation",
     "phase": 1,
     "phase_name": "法則の創造",
@@ -9,7 +9,7 @@
   },
   {
     "tick": 6,
-    "date": "創世暦1年 1月 7日",
+    "date": "創世暦1年 初打 7日",
     "kind": "creation",
     "phase": 1,
     "phase_name": "法則の創造",

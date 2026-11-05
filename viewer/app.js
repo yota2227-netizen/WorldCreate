@@ -73,10 +73,16 @@ function eventList(list) {
   return `<ul class="events">${list.map((e) => `<li class="imp-${e.importance}"><span class="d">${esc(e.date)}</span><span class="t">${esc(e.title)}</span> ${esc(e.text)}</li>`).join("")}</ul>`;
 }
 
+function nextCreationNote() {
+  const n = D.index.next_creation_in;
+  if (!n) return "";
+  return `<p class="next-note">創造は世界の${D.index.creation_every}日（現実の${D.index.creation_every}時間）ごとに行われます。次の創造まで あと${n}日（約${n}時間）。</p>`;
+}
+
 function renderHome() {
   const last = D.creations[D.creations.length - 1];
   $("#latest-creation").innerHTML = last
-    ? `<p class="stamp">${esc(last.date)} ・ ${esc(last.phase_name)}${last.kind === "oracle" ? " ・ 神託による創造" : last.kind === "epoch" ? " ・ 時代の節目" : ""}</p><h2>最新の創造</h2><div class="narrative">${esc(last.narrative)}</div>`
+    ? `<p class="stamp">${esc(last.date)}に行われた創造 ・ ${esc(last.phase_name)}${last.kind === "oracle" ? " ・ 神託による創造" : last.kind === "epoch" ? " ・ 時代の節目" : ""}</p><h2>最新の創造</h2><div class="narrative">${esc(last.narrative)}</div>${nextCreationNote()}`
     : `<div class="empty">最初の創造を待っています。</div>`;
   const reps = D.index.reports || [];
   if (reps.length) {

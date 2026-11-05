@@ -209,6 +209,7 @@ def main():
         print("予算上限のため停止:", e)
     finally:
         C.save_state(st)
+        C.relabel_dates(st)
         C.build_index(st)
         print(f"完了: {C.date_label(st)} / 今月の使用額 ${C.usage()['cost_usd']:.4f}")
 

@@ -1,11 +1,13 @@
 {
-  "updated_at": "2026-11-05T11:02:35.400088+00:00",
+  "updated_at": "2026-11-05T11:25:39.723503+00:00",
   "world_name": "レスモネ",
   "date": "創世暦1年 初打 13日",
   "tick": 12,
   "phase": 1,
   "phase_name": "法則の創造",
   "creation_count": 3,
+  "next_creation_in": 6,
+  "creation_every": 6,
   "reports": [],
   "logs": [
     "Y0001-M01"
