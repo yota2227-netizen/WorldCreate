@@ -1,9 +1,22 @@
 {
-  "tick": 11,
+  "tick": 12,
   "phase": 1,
-  "phase_creations": 2,
-  "creation_count": 2,
+  "phase_creations": 3,
+  "creation_count": 3,
   "world_name": "レスモネ",
-  "month_names": null,
+  "month_names": [
+    "初打",
+    "薄霞",
+    "芽吹",
+    "灯守",
+    "結縄",
+    "流響",
+    "熾火",
+    "薄暮",
+    "別霜",
+    "沈降",
+    "憶積",
+    "畳"
+  ],
   "last_report_month": 0
 }
