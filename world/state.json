@@ -1,8 +1,8 @@
 {
-  "tick": 5,
+  "tick": 6,
   "phase": 1,
-  "phase_creations": 1,
-  "creation_count": 1,
+  "phase_creations": 2,
+  "creation_count": 2,
   "world_name": "レスモネ",
   "month_names": null,
   "last_report_month": 0
