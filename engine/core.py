@@ -48,7 +48,6 @@ DEFAULT_STATE = {
     "creation_count": 0,
     "world_name": None,
     "month_names": None,
-    "last_report_month": 0,
 }
 
 
@@ -63,24 +62,41 @@ def save_state(st):
 
 
 def world_date(tick):
-    """tick（経過日数）を世界の暦に変換。"""
-    y = tick // (S.DAYS_PER_MONTH * S.MONTHS_PER_YEAR) + 1
-    m = (tick // S.DAYS_PER_MONTH) % S.MONTHS_PER_YEAR + 1
-    d = tick % S.DAYS_PER_MONTH + 1
-    return y, m, d
+    """tick（経過日数、0起点）を世界の暦 (年, 月, 日) に変換。無名日は月=13。"""
+    y = tick // S.DAYS_PER_YEAR + 1
+    doy = tick % S.DAYS_PER_YEAR
+    months_days = S.DAYS_PER_MONTH * S.MONTHS_PER_YEAR
+    if doy < months_days:
+        return y, doy // S.DAYS_PER_MONTH + 1, doy % S.DAYS_PER_MONTH + 1
+    return y, S.MONTHS_PER_YEAR + 1, doy - months_days + 1
+
+
+def month_name(st, m):
+    if m > S.MONTHS_PER_YEAR:
+        return "無名日"
+    names = st.get("month_names")
+    return names[m - 1] if names and len(names) >= m else f"{m}月"
 
 
 def date_label(st, tick=None):
     tick = st["tick"] if tick is None else tick
     y, m, d = world_date(tick)
-    names = st.get("month_names")
-    mname = names[m - 1] if names and len(names) >= m else f"{m}月"
-    return f"創世暦{y}年 {mname} {d}日"
+    if m > S.MONTHS_PER_YEAR:
+        return f"創世暦{y}年 無名{'一二三四五'[d - 1]}日"
+    return f"創世暦{y}年 {month_name(st, m)} {d}日"
 
 
 def month_key(tick):
     y, m, _ = world_date(tick)
     return f"Y{y:04d}-M{m:02d}"
+
+
+def month_range(tick):
+    """tick を含む月（または無名日の期間）の [開始tick, 終了tick) を返す。"""
+    y, m, d = world_date(tick)
+    start = tick - (d - 1)
+    length = S.DAYS_PER_MONTH if m <= S.MONTHS_PER_YEAR else S.NAMELESS_DAYS
+    return start, start + length
 
 
 def phase_info(st):
@@ -257,6 +273,7 @@ def build_index(st):
         "logs": sorted(p.stem for p in (WORLD / "log").glob("*.json")),
         "creations": sorted(p.stem for p in (WORLD / "creations").glob("*.json")),
         "canon": list(S.CANON_FILES.items()),
+        "month_names": st.get("month_names"),
         "usage": read_json("usage.json", {}),
     }
     write_json("index.json", idx)

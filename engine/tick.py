@@ -119,28 +119,27 @@ def run_day(st):
 
 
 # ---------- 月報 ----------
-def run_report(st, month_tick):
-    key = C.month_key(month_tick)
+def run_report(st, any_tick_in_month):
+    start, end = C.month_range(any_tick_in_month)
+    key = C.month_key(start)
     log = C.read_json(f"log/{key}.json", [])
-    y, m, _ = C.world_date(month_tick)
+    y, m, _ = C.world_date(start)
+    mname = C.month_name(st, m)
     print(f"[月報] {key}（出来事 {len(log)} 件）")
-    tl = [t for t in C.read_json("timeline.json", [])
-          if month_tick <= t["tick"] < month_tick + S.DAYS_PER_MONTH]
-    names = st.get("month_names")
-    mname = names[m - 1] if names else f"{m}月"
+    tl = [t for t in C.read_json("timeline.json", []) if start <= t["tick"] < end]
+    period = f"創世暦{y}年 {mname}" + ("（年末の名前のない2日間）" if m > S.MONTHS_PER_YEAR else "")
     ctx = (
         base_context(st)
-        + f"\n# 対象: 創世暦{y}年 {mname}\n"
-        + "\n# この月の出来事\n" + ("\n".join(f"- {e['date']} 【{e['title']}】{e['text']}" for e in log) or "（記録なし）")
-        + "\n\n# この月に年表へ刻まれたこと\n" + ("\n".join(f"- {t['title']}: {t['summary']}" for t in tl) or "（なし）")
-        + "\n\n# この月の創造の記録\n" + creations_context(4)
-        + "\n\nこの1か月をまとめた月報を書いてください。"
+        + f"\n# 対象: {period}\n"
+        + "\n# この期間の出来事\n" + ("\n".join(f"- {e['date']} 【{e['title']}】{e['text']}" for e in log) or "（記録なし）")
+        + "\n\n# この期間に年表へ刻まれたこと\n" + ("\n".join(f"- {t['title']}: {t['summary']}" for t in tl) or "（なし）")
+        + "\n\n# 直近の創造の記録\n" + creations_context(5)
+        + "\n\nこの期間をまとめた月報を書いてください。"
     )
     res = C.call_tool(S.MODEL_SMALL, C.prompt("reporter"), ctx, T.REPORT, 6000)
     path = C.WORLD / "chronicle" / f"{key}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(f"# {res.get('headline', '')}\n\n*創世暦{y}年 {mname}*\n\n{res.get('article', '')}\n", encoding="utf-8")
-    st["last_report_month"] = month_tick // S.DAYS_PER_MONTH + 1
+    path.write_text(f"# {res.get('headline', '')}\n\n*{period}*\n\n{res.get('article', '')}\n", encoding="utf-8")
 
 
 # ---------- 大事件と全体点検 ----------
@@ -183,8 +182,8 @@ def do_auto(st):
     st["tick"] += 1      # 一日を進める
     if st["tick"] % S.CREATION_EVERY_TICKS == 0:
         run_create(st)
-    if st["tick"] % S.REPORT_EVERY_TICKS == 0:
-        run_report(st, st["tick"] - S.DAYS_PER_MONTH)
+    if C.world_date(st["tick"])[2] == 1:      # 新しい月（または無名日）に入った
+        run_report(st, st["tick"] - 1)        # → 終わったばかりの月の月報
     if st["tick"] % S.EPOCH_EVERY_TICKS == 0:
         run_epoch(st)
 
@@ -200,7 +199,7 @@ def main():
         elif mode == "create":
             run_create(st)
         elif mode == "report":
-            run_report(st, max(0, (st["tick"] // S.DAYS_PER_MONTH) * S.DAYS_PER_MONTH))
+            run_report(st, st["tick"])
         elif mode == "epoch":
             run_epoch(st)
         else:

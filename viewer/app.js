@@ -91,7 +91,7 @@ function renderHome() {
       $("#latest-report").innerHTML = `<h2>最新の月報</h2><p style="font-family:var(--serif);font-size:18px">${esc(head.slice(2))}</p><p><a href="#" style="color:var(--gold)" onclick="show('reports');return false">月報を読む →</a></p>`;
     });
   } else {
-    $("#latest-report").innerHTML = `<h2>最新の月報</h2><p class="muted">最初の月報は、世界の1か月（現実の1日）が過ぎると届きます。</p>`;
+    $("#latest-report").innerHTML = `<h2>最新の月報</h2><p class="muted">最初の月報は、世界の1か月（29日＝現実の約29時間）が過ぎると届きます。</p>`;
   }
   $("#recent-events").innerHTML = `<h2>最近の出来事</h2>${eventList(D.events.slice(-8).reverse())}`;
   const u = D.index.usage || {};
@@ -129,7 +129,14 @@ async function renderReports() {
     $("#report-body").innerHTML = `<div class="empty" style="color:#6b5f48">まだ月報はありません。</div>`;
     return;
   }
-  sel.innerHTML = reps.map((k) => `<option value="${k}">${k.replace(/Y0*(\d+)-M0*(\d+)/, "創世暦$1年 $2月")}</option>`).join("");
+  const mn = D.index.month_names || [];
+  const label = (k) => {
+    const [, y, m] = k.match(/Y0*(\d+)-M0*(\d+)/) || [];
+    if (!y) return k;
+    const name = Number(m) > 12 ? "無名日" : mn[m - 1] || `${m}月`;
+    return `創世暦${y}年 ${name}`;
+  };
+  sel.innerHTML = reps.map((k) => `<option value="${k}">${label(k)}</option>`).join("");
   const showRep = async () => { $("#report-body").innerHTML = md(await get(`chronicle/${sel.value}.md`, "text")); };
   sel.onchange = showRep;
   showRep();

@@ -16,12 +16,17 @@ PRICES = {
 # 月の予算上限（USD）。これを超えるとその月は自動停止します。
 MONTHLY_BUDGET_USD = float(os.environ.get("WORLD_MONTHLY_BUDGET", "90"))
 
-# 時間の流れ：毎時1回の実行 = 世界の1日。1か月 = 24日 → 現実の1日で世界の1か月。
-DAYS_PER_MONTH = 24
+# 時間の流れ：毎時1回の実行 = 世界の1日。
+# 暦は世界の中でAIが定めたもの（canon/calendar.md）に合わせている：
+#   1か月 = 29日 × 12か月 + 年末の無名日 2日 = 1年 350日
+#   → 世界の1か月は現実の約29時間、1年は現実の約2週間半。
+DAYS_PER_MONTH = 29
 MONTHS_PER_YEAR = 12
+NAMELESS_DAYS = 2
+DAYS_PER_YEAR = DAYS_PER_MONTH * MONTHS_PER_YEAR + NAMELESS_DAYS
 
 CREATION_EVERY_TICKS = 6     # 6時間ごとに創造
-REPORT_EVERY_TICKS = 24      # 1日ごと（世界の1か月ごと）に月報
+# 月報は世界の月が変わるたびに書く（無名日の2日間も1回の報告にまとめる）
 EPOCH_EVERY_TICKS = 168      # 1週間ごとに大事件と点検
 
 # 創造の段階。min/max は「その段階で行う創造回数」の下限・上限。
