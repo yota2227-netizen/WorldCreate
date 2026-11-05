@@ -44,7 +44,7 @@ index.html, viewer/  観測用Webページ
 2. **Webページの公開**：Settings → Pages → Build and deployment で
    Source を「Deploy from a branch」、Branch を `main` / `/(root)` にして保存。
 3. **最初の創造**：Actions → 「世界の時計」→ Run workflow（mode: auto）。
-   以後は毎時自動で動きます。
+   以後は cron-job.org から毎時、この workflow_dispatch が呼ばれて動きます。
 
 ## 調整
 
