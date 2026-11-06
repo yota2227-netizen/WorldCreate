@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-11-06T13:01:04.654840+00:00",
+  "updated_at": "2026-11-06T14:01:04.867595+00:00",
   "world_name": "レスモネ",
-  "date": "創世暦1年 薄霞 10日",
-  "tick": 38,
+  "date": "創世暦1年 薄霞 11日",
+  "tick": 39,
   "phase": 2,
   "phase_name": "大地の創造",
   "creation_count": 9,
-  "next_creation_in": 4,
+  "next_creation_in": 3,
   "creation_every": 6,
   "reports": [
     "Y0001-M01"
@@ -68,12 +68,12 @@
   ],
   "usage": {
     "month": "2026-11",
-    "cost_usd": 2.58534,
-    "calls": 60,
+    "cost_usd": 2.654077,
+    "calls": 61,
     "by_model": {
       "claude-sonnet-5-5": {
-        "calls": 20,
-        "cost_usd": 1.319408
+        "calls": 21,
+        "cost_usd": 1.388145
       },
       "claude-haiku-5-5": {
         "calls": 33,
