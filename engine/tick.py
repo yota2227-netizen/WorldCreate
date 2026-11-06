@@ -64,7 +64,7 @@ def advance_phase(st, complete_flag):
         st["phase_creations"] = 0
         nxt = C.phase_info(st)
         C.add_timeline(st, [{"title": f"第{st['phase']}期「{nxt['name']}」の始まり",
-                             "summary": nxt["goal"], "importance": 3}], kind="phase")
+                             "summary": nxt.get("desc", nxt["goal"]), "importance": 3}], kind="phase")
         print(f"  → 第{st['phase']}期「{nxt['name']}」へ移行")
 
 
