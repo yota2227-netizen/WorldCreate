@@ -53,7 +53,10 @@ CANON_FILES = {
     "peoples": "種族と文明",
     "history": "歴史の要約",
     "calendar": "暦と天体",
+    "mysteries": "未解決の謎",
 }
+# AIが canon_edits で直接書き換えてよい聖典（未解決の謎はエンジンが管理する）
+EDITABLE_CANON = [k for k in CANON_FILES if k != "mysteries"]
 
 # 数値データの種類
 COLLECTIONS = ["regions", "species", "peoples", "settlements", "magic"]

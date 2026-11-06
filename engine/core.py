@@ -178,6 +178,64 @@ def apply_data_ops(ops):
     return sorted(changed)
 
 
+# ---------- 未解決の謎 ----------
+MYST_HEAD = "# 未解決の謎\nこの世界でまだ答えの出ていない問い。創造や時代の節目で、ふさわしい時に答えが明かされる。\n"
+
+
+def _mysteries():
+    p = WORLD / "canon" / "mysteries.md"
+    open_, solved = [], []
+    if p.exists():
+        sec = None
+        for line in p.read_text(encoding="utf-8").splitlines():
+            if line.startswith("## まだ"):
+                sec = open_
+            elif line.startswith("## 解き"):
+                sec = solved
+            elif line.startswith("- ") and sec is not None:
+                sec.append(line)
+            elif line.startswith("  ") and sec:
+                sec[-1] += "\n" + line
+    return open_, solved
+
+
+def _save_mysteries(open_, solved):
+    body = MYST_HEAD + "\n## まだ答えの出ていない謎\n" + ("\n".join(open_) or "（いまはない）") + \
+        "\n\n## 解き明かされた謎\n" + ("\n".join(solved) or "（まだない）") + "\n"
+    (WORLD / "canon").mkdir(parents=True, exist_ok=True)
+    (WORLD / "canon" / "mysteries.md").write_text(body, encoding="utf-8")
+
+
+def add_mysteries(st, questions):
+    questions = [q.strip() for q in (questions or []) if q and q.strip()]
+    if not questions:
+        return
+    open_, solved = _mysteries()
+    nums = [int(n) for n in re.findall(r"謎-(\d+)", "\n".join(open_ + solved))]
+    n = max(nums, default=0)
+    for q in questions[:3]:
+        n += 1
+        open_.append(f"- **謎-{n:03d}**：{q}（記録：{date_label(st)}）")
+    _save_mysteries(open_, solved)
+    print(f"  未解決の謎を {len(questions[:3])} 件記録")
+
+
+def resolve_mysteries(st, resolved):
+    if not resolved:
+        return
+    open_, solved = _mysteries()
+    for r in resolved:
+        mid = str(r.get("id", "")).strip()
+        hit = next((l for l in open_ if f"**{mid}**" in l), None)
+        if not hit:
+            continue
+        open_.remove(hit)
+        q = re.sub(r"（記録：.*?）$", "", hit.split("**：", 1)[-1])
+        solved.append(f"- **{mid}**：{q}\n  - → {r.get('answer', '').strip()}（解決：{date_label(st)}）")
+        print(f"  {mid} が解かれた")
+    _save_mysteries(open_, solved)
+
+
 # ---------- 記録 ----------
 def add_events(st, events):
     key = month_key(st["tick"])

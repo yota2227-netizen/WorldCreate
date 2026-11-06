@@ -14,7 +14,7 @@ _DATA_OP = {
 _CANON_EDIT = {
     "type": "object",
     "properties": {
-        "file": {"type": "string", "enum": list(S.CANON_FILES)},
+        "file": {"type": "string", "enum": S.EDITABLE_CANON},
         "mode": {"type": "string", "enum": ["append", "replace"]},
         "content": {"type": "string", "description": "Markdown。append は末尾に追記、replace はファイル全体を置き換え。"},
     },
@@ -37,13 +37,21 @@ CREATE = {
     "input_schema": {
         "type": "object",
         "properties": {
-            "narrative": {"type": "string", "description": "今回の創造を物語る記録（創世記の一節のような文体、300〜800字）"},
+            "narrative": {"type": "string", "description": "この創造で世界に加わったものを紹介する読み物（300〜600字）。指示書の「文章のルール」に従う。"},
             "canon_edits": {"type": "array", "items": _CANON_EDIT},
             "data_ops": {"type": "array", "items": _DATA_OP},
             "timeline": {"type": "array", "items": _TIMELINE, "description": "年表に残すべき出来事（なければ空）"},
             "world_name": {"type": "string", "description": "世界の名前を決めた/変えた場合のみ"},
             "month_names": {"type": "array", "items": {"type": "string"}, "description": f"暦の月名を決めた場合のみ（{S.MONTHS_PER_YEAR}個）"},
             "phase_complete": {"type": "boolean", "description": "現在の創造段階の目標が十分に満たされたと判断したら true"},
+            "resolved_mysteries": {
+                "type": "array",
+                "description": "今回の創造で答えを出した「未解決の謎」。答えの中身は canon_edits で該当する聖典に書いたうえで報告する。なければ空。",
+                "items": {"type": "object", "properties": {
+                    "id": {"type": "string", "description": "謎の番号（例：謎-003）"},
+                    "answer": {"type": "string", "description": "答えの要約（一〜二文）"}},
+                    "required": ["id", "answer"]},
+            },
         },
         "required": ["narrative", "canon_edits", "data_ops", "timeline", "phase_complete"],
     },
@@ -82,6 +90,8 @@ CHECK = {
         "properties": {
             "ok": {"type": "boolean"},
             "problems": {"type": "array", "items": {"type": "string"}},
+            "questions": {"type": "array", "items": {"type": "string"},
+                          "description": "矛盾ではないが、この創造で新たに生まれた・浮かび上がった未解決の疑問（0〜3件）。既に「未解決の謎」にあるものは書かない。"},
         },
         "required": ["ok", "problems"],
     },

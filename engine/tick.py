@@ -51,6 +51,7 @@ def apply_creation(st, res, kind):
     if isinstance(mn, list) and len(mn) == S.MONTHS_PER_YEAR:
         st["month_names"] = mn
     C.add_creation(st, kind, res.get("narrative", ""))
+    C.resolve_mysteries(st, res.get("resolved_mysteries"))
 
 
 def advance_phase(st, complete_flag):
@@ -91,6 +92,7 @@ def run_create(st, oracle_text=None):
         + "\n\n# 現在の数値データ\n" + C.data_summary(detail=False)
     )
     chk = C.call_tool(S.MODEL_CHECK, C.prompt("checker"), check_ctx, T.CHECK, 3000)
+    questions = chk.get("questions") or []
     if not chk.get("ok") and chk.get("problems"):
         print("  検証係が差し戻し:", chk["problems"])
         retry_ctx = ctx + "\n\n# 検証係からの指摘（前回の案はこの理由で差し戻された）\n" + \
@@ -108,6 +110,7 @@ def run_create(st, oracle_text=None):
             res = res2
 
     apply_creation(st, res, kind)
+    C.add_mysteries(st, questions)
     st["creation_count"] += 1
     advance_phase(st, bool(res.get("phase_complete")))
     return res
