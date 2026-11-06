@@ -97,6 +97,16 @@ def run_create(st, oracle_text=None):
             "\n".join(f"- {p}" for p in chk["problems"]) + "\n指摘を解消した案を出し直してください。"
         res = C.call_tool(S.MODEL_CREATOR, role, retry_ctx, T.CREATE, 16000)
 
+    # 本文だけ書いて聖典に記録しなかった場合は、聖典への反映を頼み直す
+    if not res.get("canon_edits"):
+        print("  聖典への記録がないため再依頼します")
+        fix_ctx = ctx + "\n\n# 前回の案\n" + json.dumps(res, ensure_ascii=False) + \
+            "\n\n前回の案は narrative だけで、聖典への記録（canon_edits）がなかった。" \
+            "narrative の内容を変えずに、そこで明らかにした設定を canon_edits に必ず書き込んだ案を出し直すこと。"
+        res2 = C.call_tool(S.MODEL_CREATOR, role, fix_ctx, T.CREATE, 16000)
+        if res2.get("canon_edits"):
+            res = res2
+
     apply_creation(st, res, kind)
     st["creation_count"] += 1
     advance_phase(st, bool(res.get("phase_complete")))
