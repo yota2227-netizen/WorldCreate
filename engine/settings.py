@@ -2,9 +2,10 @@
 import os
 
 # 使うモデル（役割ごと）
-MODEL_SMALL = os.environ.get("WORLD_MODEL_SMALL", "claude-haiku-5-5")    # 毎時の出来事・検証・月報
-MODEL_CREATOR = os.environ.get("WORLD_MODEL_CREATOR", "claude-sonnet-5-5")  # 6時間ごとの創造・神託
-MODEL_EPOCH = os.environ.get("WORLD_MODEL_EPOCH", "claude-opus-5-5")     # 週1回の大事件と全体点検
+MODEL_SMALL = os.environ.get("WORLD_MODEL_SMALL", "claude-sonnet-5-5")      # 毎時の出来事・月報
+MODEL_CHECK = os.environ.get("WORLD_MODEL_CHECK", "claude-opus-5-5")        # 矛盾チェック
+MODEL_CREATOR = os.environ.get("WORLD_MODEL_CREATOR", "claude-opus-5-5")    # 6時間ごとの創造・神託
+MODEL_EPOCH = os.environ.get("WORLD_MODEL_EPOCH", "claude-opus-5-5")        # 週1回の大事件と全体点検
 
 # 料金表（USD / 100万トークン）。予算管理に使う概算値。
 PRICES = {

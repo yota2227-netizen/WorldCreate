@@ -90,7 +90,7 @@ def run_create(st, oracle_text=None):
         + "\n# 今回提案された創造\n" + json.dumps(res, ensure_ascii=False)
         + "\n\n# 現在の数値データ\n" + C.data_summary(detail=False)
     )
-    chk = C.call_tool(S.MODEL_SMALL, C.prompt("checker"), check_ctx, T.CHECK, 3000)
+    chk = C.call_tool(S.MODEL_CHECK, C.prompt("checker"), check_ctx, T.CHECK, 3000)
     if not chk.get("ok") and chk.get("problems"):
         print("  検証係が差し戻し:", chk["problems"])
         retry_ctx = ctx + "\n\n# 検証係からの指摘（前回の案はこの理由で差し戻された）\n" + \
