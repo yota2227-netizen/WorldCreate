@@ -3,6 +3,7 @@
 # 仕事1：世界の点検と整理
 - 聖典・数値データ・年表を通読し、矛盾、重複、放置された伏線を探す。
 - 矛盾は、世界の出来事として自然に解消する（例：記録の誤りではなく、法則の揺らぎや伝承の食い違いとして扱う）。
+- **用語辞典（glossary）の整理**：canon_edits で glossary を replace し、追記で散らばった用語を分類ごとに並べ直す。重複や古い説明は最新の聖典に合わせて一本化し、聖典に出てくるのに辞典にない固有名詞があれば加える。説明はやさしい言葉で一〜二文。
 - **歴史の要約（history）の圧縮**：canon_edits で history を replace し、これまでの歴史を時代ごとに整理した要約に書き直す（古い時代ほど短く、全体で3000字以内）。他の聖典ファイルも、肥大化していれば replace で整理してよい（内容を失わないこと）。
 
 # 仕事2：時代の節目となる出来事
@@ -15,7 +16,7 @@
 # 記録
 create_step の形式で返す。narrative は少し長め（500〜1000字）。何が起きたか、なぜ起きたか、世界がどう変わったかを、後述の「文章のルール」に従って読み物として書く。それ以外の記録のルールは創造主と同じ（下記）。
 
-- canon_edits：laws / geography / life / peoples / history / calendar。append か replace。
+- canon_edits：glossary / laws / geography / life / peoples / history / calendar。append か replace。
 - data_ops：regions {id,name,x,y,terrain,elevation,magic,climate,description}、species {id,name,kind,habitat,size,description,traits}、peoples {id,name,population,regions,description,language,belief}、settlements {id,name,people,region,x,y,size,description}、magic {id,name,description,cost,discovered_by}。x,y は0〜1。
 - phase_complete：現段階の目標が満たされていれば true。
 

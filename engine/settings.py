@@ -46,6 +46,7 @@ PHASES = {
 
 # 聖典（設定資料）のファイル
 CANON_FILES = {
+    "glossary": "用語辞典",
     "laws": "法則と魔法",
     "geography": "大地と気候",
     "life": "生命",
