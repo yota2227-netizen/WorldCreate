@@ -29,6 +29,7 @@
   <button data-view="codex">図鑑</button>
   <button data-view="timeline">年表</button>
   <button data-view="canon">聖典</button>
+  <button data-view="search" aria-label="検索">検索</button>
 </nav>
 
 <main>
@@ -79,6 +80,14 @@
   <section id="view-canon" class="view">
     <div class="subtabs" id="canon-tabs"></div>
     <article class="card prose" id="canon-body"></article>
+  </section>
+  <section id="view-search" class="view">
+    <div class="search-box">
+      <input id="search-input" type="search" placeholder="用語・地名・出来事などを検索（例：憶石、ほどき月）" autocomplete="off" enterkeyhint="search">
+    </div>
+    <div class="search-filters" id="search-filters"></div>
+    <p class="muted search-count" id="search-count"></p>
+    <div id="search-results"></div>
   </section>
 </main>
 

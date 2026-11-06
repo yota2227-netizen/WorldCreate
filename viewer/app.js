@@ -193,8 +193,120 @@ function show(view) {
   document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === `view-${view}`));
   document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.view === view));
   if (view === "map") renderMap();
+  if (view === "search") {
+    if (!$("#search-input").value) { try { $("#search-input").value = localStorage.getItem("lastSearch") || ""; } catch {} }
+    buildSearch().then(runSearch);
+    setTimeout(() => $("#search-input").focus(), 50);
+  }
   history.replaceState(null, "", `#${view}`);
 }
 document.querySelectorAll("#tabs button").forEach((b) => b.addEventListener("click", () => show(b.dataset.view)));
+
+// ---------- 検索 ----------
+const SEARCH = { built: false, items: [], filter: "all" };
+const SRC = { term: "用語辞典", canon: "聖典", genesis: "創世記", event: "出来事", timeline: "年表", codex: "図鑑", report: "月報" };
+const kata2hira = (t) => t.replace(/[\u30a1-\u30f6]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+const norm = (t) => kata2hira(String(t || "").toLowerCase());
+
+async function buildSearch() {
+  if (SEARCH.built) return;
+  const items = [];
+  // 聖典（用語辞典は1語ずつ）
+  for (const [k, title] of D.index.canon || []) {
+    const t = (await get(`canon/${k}.md`, "text")) || "";
+    if (k === "glossary") {
+      let cat = "";
+      for (const line of t.split("\n")) {
+        if (line.startsWith("## ")) { cat = line.slice(3).trim(); continue; }
+        const m = line.match(/^-\s*\*\*(.+?)\*\*\s*[：:]\s*(.*)$/);
+        if (m) {
+          const yomi = (m[1].match(/[（(](.+?)[）)]/) || [])[1] || "";
+          items.push({ src: "term", title: m[1], text: m[2], extra: yomi, sub: cat, go: () => { show("canon"); showCanon("glossary"); } });
+        }
+      }
+      continue;
+    }
+    // 見出しごとに区切る
+    let head = title, buf = [];
+    const flush = () => { if (buf.join("").trim()) items.push({ src: "canon", title: head, text: buf.join("\n"), sub: title, go: () => { show("canon"); showCanon(k); } }); buf = []; };
+    for (const line of t.split("\n")) {
+      if (/^#{1,3} /.test(line)) { flush(); head = line.replace(/^#+\s*/, ""); } else buf.push(line.replace(/\*\*/g, ""));
+    }
+    flush();
+  }
+  for (const c of D.creations) items.push({ src: "genesis", title: `${c.date}の創造`, text: c.narrative, sub: c.phase_name, go: () => show("genesis") });
+  const logs = (await Promise.all((D.index.logs || []).map((k) => get(`log/${k}.json`)))).flat().filter(Boolean);
+  for (const e of logs) items.push({ src: "event", title: e.title, text: e.text, sub: e.date, go: () => show("home") });
+  for (const t of D.timeline) items.push({ src: "timeline", title: t.title, text: t.summary, sub: t.date, go: () => show("timeline") });
+  for (const [c, label] of [["species", "生き物"], ["peoples", "種族"], ["settlements", "集落"], ["magic", "法則と魔法"], ["regions", "地域"]])
+    for (const x of D.data[c] || []) items.push({ src: "codex", title: x.name, text: [x.description, x.cost ? `代償：${x.cost}` : ""].filter(Boolean).join(" "), sub: label, go: () => { show("codex"); renderCodex(c); } });
+  for (const k of D.index.reports || []) {
+    const t = (await get(`chronicle/${k}.md`, "text")) || "";
+    const head = (t.split("\n").find((l) => l.startsWith("# ")) || k).slice(2);
+    items.push({ src: "report", title: head, text: t.replace(/[#*]/g, ""), sub: k, go: () => { show("reports"); $("#report-select").value = k; $("#report-select").onchange(); } });
+  }
+  items.forEach((it) => { it.n = norm(`${it.title} ${it.extra || ""} ${it.text}`); it.nt = norm(`${it.title} ${it.extra || ""}`); });
+  SEARCH.items = items;
+  SEARCH.built = true;
+}
+
+function snippet(text, words) {
+  const t = String(text || "").replace(/\s+/g, " ");
+  const nt = norm(t);
+  let pos = -1;
+  for (const w of words) { pos = nt.indexOf(w); if (pos >= 0) break; }
+  const start = Math.max(0, pos - 40);
+  let s = (start > 0 ? "…" : "") + t.slice(start, start + 140) + (start + 140 < t.length ? "…" : "");
+  return highlight(s, words);
+}
+function highlight(s, words) {
+  let out = esc(s);
+  for (const w of words) {
+    if (!w) continue;
+    // ひらがな・カタカナの違いを無視して強調
+    const pat = [...w].map((ch) => {
+      const k = /[\u3041-\u3096]/.test(ch) ? String.fromCharCode(ch.charCodeAt(0) + 0x60) : "";
+      const e = ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return k ? `[${e}${k}]` : e;
+    }).join("");
+    try { out = out.replace(new RegExp(`(${pat})`, "gi"), "<mark>$1</mark>"); } catch {}
+  }
+  return out;
+}
+
+function runSearch() {
+  const q = $("#search-input").value.trim();
+  const words = norm(q).split(/[\s　]+/).filter(Boolean);
+  if (!words.length) { $("#search-results").innerHTML = `<div class="empty">調べたい言葉を入力してください。</div>`; $("#search-count").textContent = ""; $("#search-filters").innerHTML = ""; return; }
+  // 読み仮名で入力されたら、用語辞典の漢字表記でも探す（例：おくせき → 憶石）
+  const groups = words.map((w) => {
+    const alts = [w];
+    for (const it of SEARCH.items) if (it.src === "term" && it.extra && norm(it.extra) === w) alts.push(norm(it.title.replace(/[（(].*$/, "")));
+    return alts;
+  });
+  const has = (txt, g) => g.some((a) => txt.includes(a));
+  words.splice(0, words.length, ...groups.flat());
+  let hits = SEARCH.items.filter((it) => groups.every((g) => has(it.n, g)));
+  hits.forEach((it) => { it.score = (it.src === "term" ? 100 : 0) + (groups.every((g) => has(it.nt, g)) ? 50 : 0); });
+  hits.sort((a, b) => b.score - a.score);
+  const counts = {};
+  hits.forEach((h) => (counts[h.src] = (counts[h.src] || 0) + 1));
+  $("#search-filters").innerHTML = [["all", `すべて ${hits.length}`], ...Object.keys(SRC).filter((k) => counts[k]).map((k) => [k, `${SRC[k]} ${counts[k]}`])]
+    .map(([k, l]) => `<button data-f="${k}" class="${SEARCH.filter === k ? "on" : ""}">${l}</button>`).join("");
+  $("#search-filters").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { SEARCH.filter = b.dataset.f; runSearch(); }));
+  if (SEARCH.filter !== "all") hits = hits.filter((h) => h.src === SEARCH.filter);
+  $("#search-count").textContent = hits.length ? "" : "見つかりませんでした。";
+  $("#search-results").innerHTML = hits.slice(0, 80).map((h, i) => `<article class="hit ${h.src === "term" ? "term" : ""}" data-i="${i}">
+      <div class="src">${SRC[h.src]}${h.sub ? ` ・ ${esc(h.sub)}` : ""}</div>
+      <h3>${highlight(h.title, words)}</h3>
+      <p>${h.src === "term" ? highlight(h.text, words) : snippet(h.text, words)}</p></article>`).join("");
+  $("#search-results").querySelectorAll(".hit").forEach((el) => el.addEventListener("click", () => hits[+el.dataset.i].go()));
+}
+
+let searchTimer;
+$("#search-input").addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(async () => { SEARCH.filter = "all"; await buildSearch(); runSearch(); try { localStorage.setItem("lastSearch", $("#search-input").value); } catch {} }, 180);
+});
 
 load().then(() => { const h = location.hash.slice(1); if (h && $(`#view-${h}`)) show(h); });
