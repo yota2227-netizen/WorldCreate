@@ -97,5 +97,60 @@
     "magic": 0.3,
     "climate": "未定",
     "description": "輪の大陸の南に広がる海。波音が遠くまで届く。"
+  },
+  {
+    "id": "region-kasumiuke",
+    "name": "霞受けの峰",
+    "x": 0.35,
+    "y": 0.45,
+    "terrain": "mountains",
+    "elevation": 0.85,
+    "magic": 0.6,
+    "climate": "一年の大半が靄に包まれ、雨がもっとも多い。冷涼",
+    "description": "波紋山脈の西の曲がり角で、北の弧と南の弧がつながる所。常流洋から渡る余霞を正面から受ける。"
+  },
+  {
+    "id": "region-wazoko-basin",
+    "name": "輪底盆地",
+    "x": 0.42,
+    "y": 0.52,
+    "terrain": "basin",
+    "elevation": 0.5,
+    "magic": 0.8,
+    "climate": "雨はやや多い。山に囲まれ風が弱い",
+    "description": "打ち跡と波紋山脈のあいだの環状の窪地。雨水が集まり、東の口から還り川となって流れ出る。内縁では道のりがわずかに伸び縮みする。"
+  },
+  {
+    "id": "region-kaerigawa",
+    "name": "還り川",
+    "x": 0.6,
+    "y": 0.37,
+    "terrain": "river",
+    "elevation": 0.4,
+    "magic": 0.7,
+    "climate": "湿潤。下流ほど冷たい",
+    "description": "輪底盆地の水を北回りに集めて東へ流れ、別れの裂け目の西壁から高い滝となって落ちる。落水の音は裂け目に吸われてほとんど届かない。"
+  },
+  {
+    "id": "region-nibukawa",
+    "name": "鈍川",
+    "x": 0.29,
+    "y": 0.34,
+    "terrain": "river",
+    "elevation": 0.12,
+    "magic": 0.12,
+    "climate": "穏やか。雨は少なめ",
+    "description": "波紋山脈の外斜面から静原を横切って常流洋へ注ぐ、広く浅い川。固い大地の上で勢いを持てず、大きく蛇行する。"
+  },
+  {
+    "id": "region-michiyose",
+    "name": "満ち寄せ浜",
+    "x": 0.13,
+    "y": 0.48,
+    "terrain": "coast",
+    "elevation": 0.02,
+    "magic": 0.2,
+    "climate": "潮風が強く、雨は少ない",
+    "description": "静原の西の縁、常流洋に面した遠浅の渚。創世海進で海がいまも内陸へ進み、浅瀬と干潟が日ごとに形を変える。"
   }
 ]

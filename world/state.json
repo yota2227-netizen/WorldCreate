@@ -1,8 +1,8 @@
 {
-  "tick": 35,
+  "tick": 36,
   "phase": 2,
-  "phase_creations": 1,
-  "creation_count": 8,
+  "phase_creations": 2,
+  "creation_count": 9,
   "world_name": "レスモネ",
   "month_names": [
     "初打",
