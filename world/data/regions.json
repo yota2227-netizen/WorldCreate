@@ -1,0 +1,101 @@
+[
+  {
+    "id": "region-uchiato",
+    "name": "打ち跡",
+    "x": 0.5,
+    "y": 0.45,
+    "terrain": "echo-plateau",
+    "elevation": 0.85,
+    "magic": 0.97,
+    "climate": "未定。魔力の濃さで大気も揺らぐ",
+    "description": "最初の一打が起きた一点に盛り上がった高台地。岩の輪郭が揺らぎ、道のりが日によって伸び縮みする。"
+  },
+  {
+    "id": "region-hamon-north",
+    "name": "波紋山脈・北の弧",
+    "x": 0.5,
+    "y": 0.3,
+    "terrain": "mountains",
+    "elevation": 0.95,
+    "magic": 0.7,
+    "climate": "未定。高く冷たい",
+    "description": "打ち跡を囲む輪状の山脈の北半分。押し合った山の根に結の余韻が厚い。"
+  },
+  {
+    "id": "region-hamon-south",
+    "name": "波紋山脈・南の弧",
+    "x": 0.5,
+    "y": 0.6,
+    "terrain": "mountains",
+    "elevation": 0.9,
+    "magic": 0.7,
+    "climate": "未定。高く冷たい",
+    "description": "打ち跡を囲む輪状の山脈の南半分。東端で途切れ、別れの裂け目へ落ち込む。"
+  },
+  {
+    "id": "region-wakare-sakeme",
+    "name": "別れの裂け目",
+    "x": 0.68,
+    "y": 0.45,
+    "terrain": "rift",
+    "elevation": 0.05,
+    "magic": 0.75,
+    "climate": "未定。冷たく音が響きにくい",
+    "description": "大隆起で大地が裂けてできた南北に長い溝。底は海につながり、凪海と遠鳴りの海を細く結ぶ。別の余韻が濃い。"
+  },
+  {
+    "id": "region-hanarechi",
+    "name": "離れ地",
+    "x": 0.82,
+    "y": 0.45,
+    "terrain": "hills",
+    "elevation": 0.35,
+    "magic": 0.4,
+    "climate": "未定",
+    "description": "別れの裂け目によって本体から切り離された東の陸。なだらかな丘陵が続く。"
+  },
+  {
+    "id": "region-shizuhara",
+    "name": "静原",
+    "x": 0.24,
+    "y": 0.45,
+    "terrain": "plains",
+    "elevation": 0.15,
+    "magic": 0.1,
+    "climate": "未定",
+    "description": "波紋山脈の西に広がる広大な低地。出来事が少なく、魔力が薄く、大地がもっとも固く安定している。"
+  },
+  {
+    "id": "region-joryu-ocean",
+    "name": "常流洋",
+    "x": 0.05,
+    "y": 0.45,
+    "terrain": "ocean",
+    "elevation": 0,
+    "magic": 0.3,
+    "climate": "未定",
+    "description": "輪の大陸の西に広がる最も広く深い大洋。常灯の流の余韻がたまってできた。"
+  },
+  {
+    "id": "region-nagiumi",
+    "name": "凪海",
+    "x": 0.45,
+    "y": 0.07,
+    "terrain": "sea",
+    "elevation": 0,
+    "magic": 0.25,
+    "climate": "未定",
+    "description": "輪の大陸の北に広がる、波の穏やかな海。"
+  },
+  {
+    "id": "region-toonari-sea",
+    "name": "遠鳴りの海",
+    "x": 0.5,
+    "y": 0.93,
+    "terrain": "sea",
+    "elevation": 0,
+    "magic": 0.3,
+    "climate": "未定",
+    "description": "輪の大陸の南に広がる海。波音が遠くまで届く。"
+  }
+]
