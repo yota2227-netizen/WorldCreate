@@ -434,6 +434,11 @@ def call_tool(model, system_role, context, tool, max_tokens):
         cost = record_usage(model, resp.usage.model_dump())
         print(f"  [{model}] in={resp.usage.input_tokens} out={resp.usage.output_tokens} "
               f"${cost:.4f} stop={resp.stop_reason}")
+        if resp.stop_reason == "max_tokens":
+            # 考えすぎて回答の途中で上限に達した → 上限を広げて頼み直す
+            kwargs["max_tokens"] = min(kwargs["max_tokens"] * 2, 32000)
+            print(f"  回答が長さの上限に達したため、上限を {kwargs['max_tokens']} に広げて再依頼します")
+            continue
         for block in resp.content:
             if block.type == "tool_use" and block.name == tool["name"] and isinstance(block.input, dict):
                 return block.input

@@ -91,7 +91,14 @@ def run_create(st, oracle_text=None):
         + "\n# 今回提案された創造\n" + json.dumps(res, ensure_ascii=False)
         + "\n\n# 現在の数値データ\n" + C.data_summary(detail=False)
     )
-    chk = C.call_tool(S.MODEL_CHECK, C.prompt("checker"), check_ctx, T.CHECK, 3000)
+    try:
+        chk = C.call_tool(S.MODEL_CHECK, C.prompt("checker"), check_ctx, T.CHECK, 8000)
+    except C.BudgetExceeded:
+        raise
+    except Exception as e:
+        # 点検に失敗しても、創造そのものは止めない（週1回の点検で拾う）
+        print("  矛盾チェックに失敗したため、今回は点検なしで進めます:", e)
+        chk = {"ok": True, "problems": []}
     questions = chk.get("questions") or []
     if not chk.get("ok") and chk.get("problems"):
         print("  検証係が差し戻し:", chk["problems"])
@@ -126,7 +133,7 @@ def run_day(st):
         + "\n\n# 現在の数値データ（概要）\n" + C.data_summary(detail=False, limit=40)
         + "\n\nこの日に起きた小さな出来事を記録してください。"
     )
-    res = C.call_tool(S.MODEL_SMALL, C.prompt("daily"), ctx, T.EVENTS, 4000)
+    res = C.call_tool(S.MODEL_SMALL, C.prompt("daily"), ctx, T.EVENTS, 6000)
     C.add_events(st, res.get("events"))
     C.apply_data_ops(res.get("data_ops"))
 
