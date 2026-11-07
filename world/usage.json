@@ -1,11 +1,11 @@
 {
   "month": "2026-11",
-  "cost_usd": 5.855867,
-  "calls": 84,
+  "cost_usd": 5.949502,
+  "calls": 85,
   "by_model": {
     "claude-sonnet-5-5": {
-      "calls": 36,
-      "cost_usd": 2.583184
+      "calls": 37,
+      "cost_usd": 2.676818
     },
     "claude-haiku-5-5": {
       "calls": 33,
