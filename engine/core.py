@@ -104,6 +104,20 @@ def phase_info(st):
 
 
 # ---------- 聖典と数値データ ----------
+def canon_brief():
+    """日々の出来事・月報向けの軽い聖典：歴史の要約・暦と、用語の名前の一覧だけ。"""
+    parts = []
+    for key in ("history", "calendar"):
+        p = WORLD / "canon" / f"{key}.md"
+        if p.exists():
+            parts.append(f"## 【{S.CANON_FILES[key]}】\n" + p.read_text(encoding="utf-8").strip())
+    g = WORLD / "canon" / "glossary.md"
+    if g.exists():
+        names = re.findall(r"^-\s*\*\*(.+?)\*\*", g.read_text(encoding="utf-8"), flags=re.M)
+        parts.append("## 【この世界の用語（名前のみ）】\n" + "、".join(names))
+    return "\n\n".join(parts)
+
+
 def canon_text():
     parts = []
     for key, title in S.CANON_FILES.items():
@@ -399,7 +413,7 @@ class BudgetExceeded(Exception):
     pass
 
 
-def call_tool(model, system_role, context, tool, max_tokens):
+def call_tool(model, system_role, context, tool, max_tokens, canon="full", cache=False):
     """AIに指定ツールの形式で答えさせ、その中身(dict)を返す。"""
     if os.environ.get("WORLD_MOCK"):
         import mock
@@ -410,11 +424,14 @@ def call_tool(model, system_role, context, tool, max_tokens):
 
     import anthropic
     client = anthropic.Anthropic(max_retries=4)
-    system = [
-        {"type": "text", "text": system_role},
-        {"type": "text", "text": "# 世界の聖典（これまでに定められた設定）\n\n" + canon_text(),
-         "cache_control": {"type": "ephemeral"}},
-    ]
+    if canon == "brief":
+        canon_block = {"type": "text", "text": "# 世界の概要（聖典の要約）\n\n" + canon_brief()}
+    else:
+        canon_block = {"type": "text", "text": "# 世界の聖典（これまでに定められた設定）\n\n" + canon_text()}
+    # 同じ実行の中で同じ依頼を繰り返す（差し戻し・再依頼）ときだけキャッシュが効くので、その場合に限って使う
+    if cache:
+        canon_block["cache_control"] = {"type": "ephemeral"}
+    system = [{"type": "text", "text": system_role}, canon_block]
     instruction = (f"\n\n【回答方法】考えがまとまったら、必ず {tool['name']} ツールを1回だけ呼び出して回答すること。"
                    "ツールを使わずに文章だけで答えてはいけない。")
     kwargs = dict(model=model, max_tokens=max_tokens, system=system,
@@ -424,7 +441,9 @@ def call_tool(model, system_role, context, tool, max_tokens):
         forced = model not in _NO_FORCED_TOOL
         try:
             choice = {"type": "tool", "name": tool["name"]} if forced else {"type": "auto"}
-            resp = client.messages.create(tool_choice=choice, **kwargs)
+            # 長い回答でも途中で切られないよう、ストリーミングで受け取る
+            with client.messages.stream(tool_choice=choice, **kwargs) as stream:
+                resp = stream.get_final_message()
         except anthropic.BadRequestError as e:
             # 一部のモデルは「ツールの強制」に非対応。その場合は自由回答＋指示で頼む
             if forced and "tool_choice" in str(e):

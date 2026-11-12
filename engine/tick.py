@@ -83,7 +83,7 @@ def run_create(st, oracle_text=None):
     ctx += "\n\n上の状況を踏まえ、創造を一歩だけ進めてください。"
 
     role = C.prompt("creator")
-    res = C.call_tool(S.MODEL_CREATOR, role, ctx, T.CREATE, 16000)
+    res = C.call_tool(S.MODEL_CREATOR, role, ctx, T.CREATE, 16000, cache=True)
 
     # 検証係による矛盾チェック（1回だけ差し戻し可）
     check_ctx = (
@@ -104,7 +104,7 @@ def run_create(st, oracle_text=None):
         print("  検証係が差し戻し:", chk["problems"])
         retry_ctx = ctx + "\n\n# 検証係からの指摘（前回の案はこの理由で差し戻された）\n" + \
             "\n".join(f"- {p}" for p in chk["problems"]) + "\n指摘を解消した案を出し直してください。"
-        res = C.call_tool(S.MODEL_CREATOR, role, retry_ctx, T.CREATE, 16000)
+        res = C.call_tool(S.MODEL_CREATOR, role, retry_ctx, T.CREATE, 16000, cache=True)
 
     # 本文だけ書いて聖典に記録しなかった場合は、聖典への反映を頼み直す
     if not res.get("canon_edits"):
@@ -112,7 +112,7 @@ def run_create(st, oracle_text=None):
         fix_ctx = ctx + "\n\n# 前回の案\n" + json.dumps(res, ensure_ascii=False) + \
             "\n\n前回の案は narrative だけで、聖典への記録（canon_edits）がなかった。" \
             "narrative の内容を変えずに、そこで明らかにした設定を canon_edits に必ず書き込んだ案を出し直すこと。"
-        res2 = C.call_tool(S.MODEL_CREATOR, role, fix_ctx, T.CREATE, 16000)
+        res2 = C.call_tool(S.MODEL_CREATOR, role, fix_ctx, T.CREATE, 16000, cache=True)
         if res2.get("canon_edits"):
             res = res2
 
@@ -133,7 +133,7 @@ def run_day(st):
         + "\n\n# 現在の数値データ（概要）\n" + C.data_summary(detail=False, limit=40)
         + "\n\nこの日に起きた小さな出来事を記録してください。"
     )
-    res = C.call_tool(S.MODEL_SMALL, C.prompt("daily"), ctx, T.EVENTS, 6000)
+    res = C.call_tool(S.MODEL_SMALL, C.prompt("daily"), ctx, T.EVENTS, 6000, canon="brief")
     C.add_events(st, res.get("events"))
     C.apply_data_ops(res.get("data_ops"))
 
@@ -156,7 +156,7 @@ def run_report(st, any_tick_in_month):
         + "\n\n# 直近の創造の記録\n" + creations_context(5)
         + "\n\nこの期間をまとめた月報を書いてください。"
     )
-    res = C.call_tool(S.MODEL_SMALL, C.prompt("reporter"), ctx, T.REPORT, 6000)
+    res = C.call_tool(S.MODEL_SMALL, C.prompt("reporter"), ctx, T.REPORT, 6000, canon="brief")
     path = C.WORLD / "chronicle" / f"{key}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(f"# {res.get('headline', '')}\n\n*{period}*\n\n{res.get('article', '')}\n", encoding="utf-8")
@@ -174,7 +174,7 @@ def run_epoch(st):
         + "\n\n# 現在の数値データ\n" + C.data_summary()
         + "\n\n世界全体を点検し、時代の節目となる創造を行ってください。"
     )
-    res = C.call_tool(S.MODEL_EPOCH, C.prompt("epoch"), ctx, T.CREATE, 20000)
+    res = C.call_tool(S.MODEL_EPOCH, C.prompt("epoch"), ctx, T.CREATE, 32000)
     apply_creation(st, res, "epoch")
     st["creation_count"] += 1
     advance_phase(st, bool(res.get("phase_complete")))
@@ -205,7 +205,12 @@ def do_auto(st):
     if C.world_date(st["tick"])[2] == 1:      # 新しい月（または無名日）に入った
         run_report(st, st["tick"] - 1)        # → 終わったばかりの月の月報
     if st["tick"] % S.EPOCH_EVERY_TICKS == 0:
-        run_epoch(st)
+        try:
+            run_epoch(st)
+        except C.BudgetExceeded:
+            raise
+        except Exception as e:
+            print("::warning::時代の節目の処理に失敗しました（次の節目で再挑戦）:", e)
 
 
 def main():
